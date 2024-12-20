@@ -1,0 +1,22 @@
+def atr_label_threshold_long(df, bars):
+    df['ATR'] = ta.atr(df['High'], df['Low'], df['Close'])
+    
+    ratio = 1
+    slcoef = 1
+    tpcoef = ratio * slcoef
+    
+    lower_threshold_long = df['Close'] - df['ATR']*slcoef
+    upper_threshold_long = df['Close'] + df['ATR']*tpcoef
+    
+    df = df.reset_index(drop=True)
+    df['Label'] = 0
+    for i in range(len(df) - bars):
+        condition_1 = (df['Close'][i + 1:i + bars + 1] > upper_threshold_long.iloc[i]).any()
+        condition_2 = (df['Close'][i + 1:i + bars + 1] > lower_threshold_long.iloc[i]).all()
+        
+        if condition_1 and condition_2:
+            df.loc[i, 'Label'] = 1
+    
+    return df
+
+df = atr_label_threshold_long(df, 7)
